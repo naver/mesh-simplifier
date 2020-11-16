@@ -1,66 +1,71 @@
 {
-  "name": "mesh-simplifier",
-  "version": "0.1.0",
-  "description": "Collection of mesh simplification methods written in Typescript",
-  "main": "dist/mesh-simplifier.js",
-  "module": "dist/mesh-simplifier.esm.js",
-  "es2015": "dist/mesh-simplifier.esm.js",
-  "types": "declaration/index.d.ts",
-  "scripts": {
-    "dev": "rollup -w --config ./demo/rollup.config.demo.js",
-    "build": "rm -rf ./dist ./declaration && rollup -c && npm run declaration && npm run printsizes",
-    "declaration": "rm -rf declaration && ttsc -p tsconfig.declaration.json",
-    "printsizes": "print-sizes ./dist --exclude=\\.map",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/naver/mesh-simplifier"
-  },
-  "author": "NAVER Corp.",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/naver/mesh-simplifier/issues"
-  },
-  "homepage": "https://github.com/naver/mesh-simplifier#readme",
-  "peerDependencies": {
-    "three": "^0.116.1"
-  },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^11.1.0",
-    "@rollup/plugin-json": "^4.0.3",
-    "@rollup/plugin-node-resolve": "^7.1.3",
-    "@rollup/plugin-replace": "^2.3.2",
-    "cpx": "^1.5.0",
-    "gh-pages": "^2.2.0",
-    "husky": "^4.2.5",
-    "print-sizes": "^0.1.0",
-    "rollup": "^2.7.6",
-    "rollup-plugin-livereload": "^1.3.0",
-    "rollup-plugin-prototype-minify": "^1.1.0",
-    "rollup-plugin-serve": "^1.0.1",
-    "rollup-plugin-typescript2": "^0.27.0",
-    "rollup-plugin-uglify": "^6.0.4",
-    "rollup-plugin-visualizer": "^4.0.4",
-    "three": "^0.116.1",
-    "tslint": "^6.1.2",
-    "tslint-consistent-codestyle": "^1.16.0",
-    "tslint-eslint-rules": "^5.4.0",
-    "tslint-lines-between-class-members": "^1.3.6",
-    "ttypescript": "^1.5.10",
-    "typescript": "^3.8.3",
-    "typescript-transform-paths": "^1.1.14"
-  },
-  "keywords": [
-    "3d",
-    "3d-model",
-    "mesh-simplification",
-    "typescript"
-  ],
-  "husky": {
-    "hooks": {
-      "commit-msg": "node config/validate-commit-msg.js"
-    }
-  },
-  "dependencies": {}
+	"name": "mesh-simplifier",
+	"version": "1.0.0",
+	"description": "Collection of mesh simplification methods written in Typescript",
+	"main": "dist/mesh-simplifier.js",
+	"module": "dist/mesh-simplifier.esm.js",
+	"es2015": "dist/mesh-simplifier.esm.js",
+	"types": "declaration/index.d.ts",
+	"scripts": {
+		"dev": "rollup -w --config ./demo/rollup.config.demo.js",
+		"build": "rm -rf ./dist ./declaration && rollup -c && npm run declaration && npm run printsizes",
+		"declaration": "rm -rf declaration && ttsc -p tsconfig.declaration.json",
+		"printsizes": "print-sizes ./dist --exclude=\\.map",
+		"demo:build": "rollup --config ./demo/rollup.config.demo.build.js",
+		"demo:deploy-origin": "npm run demo:build && gh-pages -d demo/",
+		"demo:deploy": "npm run demo:build && gh-pages -d demo/ --add --remote upstream",
+		"release": "release-helper upstream",
+		"lint": "tslint -c tslint.json 'src/**/*.ts'"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/naver/mesh-simplifier"
+	},
+	"author": "NAVER Corp.",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/naver/mesh-simplifier/issues"
+	},
+	"homepage": "https://github.com/naver/mesh-simplifier#readme",
+	"peerDependencies": {
+		"three": "^0.116.1"
+	},
+	"devDependencies": {
+		"@egjs/release-helper": "0.0.3",
+		"@rollup/plugin-commonjs": "^11.1.0",
+		"@rollup/plugin-json": "^4.0.3",
+		"@rollup/plugin-node-resolve": "^7.1.3",
+		"@rollup/plugin-replace": "^2.3.2",
+		"cpx": "^1.5.0",
+		"gh-pages": "^2.2.0",
+		"husky": "^4.2.5",
+		"print-sizes": "^0.1.0",
+		"rollup": "^2.7.6",
+		"rollup-plugin-livereload": "^1.3.0",
+		"rollup-plugin-prototype-minify": "^1.1.0",
+		"rollup-plugin-serve": "^1.0.1",
+		"rollup-plugin-typescript2": "^0.27.0",
+		"rollup-plugin-uglify": "^6.0.4",
+		"rollup-plugin-visualizer": "^4.0.4",
+		"three": "^0.116.1",
+		"tslint": "^6.1.2",
+		"tslint-consistent-codestyle": "^1.16.0",
+		"tslint-eslint-rules": "^5.4.0",
+		"tslint-lines-between-class-members": "^1.3.6",
+		"ttypescript": "^1.5.10",
+		"typescript": "^3.8.3",
+		"typescript-transform-paths": "^1.1.14"
+	},
+	"keywords": [
+		"3d",
+		"3d-model",
+		"mesh-simplification",
+		"typescript"
+	],
+	"husky": {
+		"hooks": {
+			"commit-msg": "node config/validate-commit-msg.js"
+		}
+	},
+	"dependencies": {}
 }
