@@ -85,14 +85,14 @@ class FQDemo2 implements Renderable {
         }
       });
 
-      this._simpScene = this._origScene.clone(true);
+      const adaptedScene = new ThreeAdapter(this._origScene, true);
+      this._simpScene = adaptedScene.object;
 
       const bbox = new THREE.Box3().setFromObject(gltf.scene);
       this._origScene.position.sub(bbox.getCenter(new THREE.Vector3()));
       this._simpScene.position.copy(this._origScene.position);
 
       const simplifier = new FastQuadric({ targetPercentage: 0.5 });
-      const adaptedScene = new ThreeAdapter(this._simpScene);
 
       this._origScene.position.sub(new THREE.Vector3(3, 0, 0));
       this._simpScene.position.add(new THREE.Vector3(3, 0, 0));

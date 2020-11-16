@@ -104,6 +104,7 @@ typings/
 ## Custom ###
 .DS_Store
 dist/
+demo/dist/
 outjs/
 declaration/
 docs/
