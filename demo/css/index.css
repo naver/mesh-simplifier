@@ -1,0 +1,51 @@
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+.container {
+  display: grid;
+  position: relative;
+  grid-template-columns: 20% 80%;
+  grid-template-areas: "selector canvas";
+}
+#canvas-wrapper {
+  grid-area: canvas;
+  display: flex;
+  box-sizing: border-box;
+  flex: 1;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: white;
+  justify-content: center;
+}
+#page-selector {
+  grid-area: selector;
+  font-size: 20px;
+  padding: 5px;
+}
+#page-selector .page {
+  width: 100%;
+  cursor: pointer;
+}
+#page-description {
+  position: absolute;
+  top: 0;
+}
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+@media only screen and (max-width: 800px) {
+  .container {
+    display: block;
+  }
+  #canvas-wrapper {
+    height: 80vh;
+    /* flex-direction: column-reverse; */
+    position: relative;
+  }
+}
