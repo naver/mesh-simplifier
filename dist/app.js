@@ -56563,7 +56563,8 @@ version: 1.0.0-snapshot
 	          });
 	        }
 	      });
-	      _this._simpScene = _this._origScene.clone(true);
+	      var adaptedScene = new ThreeAdapter(_this._origScene, true);
+	      _this._simpScene = adaptedScene.object;
 	      var bbox = new Box3().setFromObject(gltf.scene);
 
 	      _this._origScene.position.sub(bbox.getCenter(new Vector3()));
@@ -56573,7 +56574,6 @@ version: 1.0.0-snapshot
 	      var simplifier = new FastQuadric({
 	        targetPercentage: 0.5
 	      });
-	      var adaptedScene = new ThreeAdapter(_this._simpScene);
 
 	      _this._origScene.position.sub(new Vector3(3, 0, 0));
 
