@@ -7,7 +7,7 @@ import * as THREE from "three";
 import Geometry from "./Geometry";
 import Vector3 from "~/math/Vector3";
 import Face3 from "~/math/Face3";
-import { getUintArrayByVertexLength, range } from "~/utils";
+import { getUintArrayByVertexLength } from "~/utils";
 
 // TODO: Support line geometry
 
@@ -36,32 +36,36 @@ class ThreeGeometry implements Geometry {
 
   public prepare() {
     const geometry = this.originalGeometry;
-    const vertices = geometry.attributes.position
-      ? range(geometry.attributes.position.count).map(idx => {
-        const pos = geometry.attributes.position;
-        const startIdx = pos.itemSize * idx;
-        const arr = pos.array;
-        return new Vector3(
-          arr[startIdx + 0],
-          arr[startIdx + 1],
-          arr[startIdx + 2]
-        );
-      })
-      : [];
+    const position = geometry.attributes.position;
+    const face = geometry.index;
 
-    const faces = geometry.index
-      ? range(geometry.index.count / 3).map(idx => {
-        const face = geometry.index!;
-        const startIdx = 3 * idx;
-        const arr = face.array;
+    const vertexCount = position?.count ?? 0;
+    const faceCount = (face?.count ?? 0) / 3;
 
-        return new Face3(
-          arr[startIdx + 0],
-          arr[startIdx + 1],
-          arr[startIdx + 2]
-        );
-      })
-      : [];
+    const vertices = new Array(vertexCount);
+    const faces = new Array(faceCount);
+
+    for (let idx = 0; idx < vertexCount; idx++) {
+      const startIdx = position.itemSize * idx;
+      const arr = position.array;
+
+      vertices[idx] = new Vector3(
+        arr[startIdx + 0],
+        arr[startIdx + 1],
+        arr[startIdx + 2]
+      );
+    }
+
+    for (let idx = 0; idx < faceCount; idx++) {
+      const startIdx = 3 * idx;
+      const arr = face!.array;
+
+      faces[idx] = new Face3(
+        arr[startIdx + 0],
+        arr[startIdx + 1],
+        arr[startIdx + 2]
+      );
+    }
 
     return {
       vertices,
