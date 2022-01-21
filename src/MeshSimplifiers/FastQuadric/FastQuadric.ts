@@ -14,7 +14,7 @@ import Face3 from "~/math/Face3";
 import SymmetricMatrix from "~/math/SymmetricMatrix";
 import Adapter from "~/Adapters/Adapter";
 import Geometry from "~/Geometries/Geometry";
-import Timer from "~/util/Timer";
+import Timer from "~/Timer";
 
 class FastQuadric implements MeshSimplifier {
   /* Options */
@@ -160,6 +160,7 @@ class FastQuadric implements MeshSimplifier {
     this._triangles = data.faces.map((f, idx) => {
       const triangle = new Triangle(idx);
       triangle.v = [f.a, f.b, f.c];
+
       return triangle;
     });
 
@@ -312,6 +313,7 @@ class FastQuadric implements MeshSimplifier {
     triangles.forEach((t, i) => {
       for (let j = 0; j < 3; j++) {
         const v = vertices[t.v[j]];
+
         refs[v.tstart + v.tcount].tid = i;
         refs[v.tstart + v.tcount].tvertex = j;
         v.tcount++;
