@@ -7,6 +7,7 @@ import * as THREE from "three";
 import Geometry from "./Geometry";
 import Vector3 from "~/math/Vector3";
 import Face3 from "~/math/Face3";
+import { getUintArrayByVertexLength } from "~/utils";
 
 // TODO: Support line geometry
 
@@ -27,28 +28,48 @@ import Face3 from "~/math/Face3";
  * const mesh = new THREE.Mesh(adaptedGeometry.simplified, material);
  */
 class ThreeGeometry implements Geometry {
-  public originalGeometry: THREE.Geometry | THREE.BufferGeometry;
-  private _processingGeometry: THREE.Geometry;
-  private _isBufferGeometry: boolean;
+  public originalGeometry: THREE.BufferGeometry;
 
-  constructor(geometry: THREE.Geometry | THREE.BufferGeometry) {
-    this._isBufferGeometry = (geometry as THREE.BufferGeometry).isBufferGeometry;
+  constructor(geometry: THREE.BufferGeometry) {
     this.originalGeometry = geometry;
-
-    if (this._isBufferGeometry) {
-      this._processingGeometry = new THREE.Geometry().fromBufferGeometry(geometry as THREE.BufferGeometry);
-    } else {
-      this._processingGeometry = this.originalGeometry as THREE.Geometry;
-    }
   }
 
   public prepare() {
-    const geometry = this._processingGeometry;
-    geometry.mergeVertices();
+    const geometry = this.originalGeometry;
+    const position = geometry.attributes.position;
+    const face = geometry.index;
+
+    const vertexCount = position?.count ?? 0;
+    const faceCount = (face?.count ?? 0) / 3;
+
+    const vertices = new Array(vertexCount);
+    const faces = new Array(faceCount);
+
+    for (let idx = 0; idx < vertexCount; idx++) {
+      const startIdx = position.itemSize * idx;
+      const arr = position.array;
+
+      vertices[idx] = new Vector3(
+        arr[startIdx + 0],
+        arr[startIdx + 1],
+        arr[startIdx + 2]
+      );
+    }
+
+    for (let idx = 0; idx < faceCount; idx++) {
+      const startIdx = 3 * idx;
+      const arr = face!.array;
+
+      faces[idx] = new Face3(
+        arr[startIdx + 0],
+        arr[startIdx + 1],
+        arr[startIdx + 2]
+      );
+    }
 
     return {
-      vertices: geometry.vertices.map(vec => new Vector3(vec.x, vec.y, vec.z)),
-      faces: geometry.faces.map(face => new Face3(face.a, face.b, face.c)),
+      vertices,
+      faces
     }
   }
 
@@ -58,73 +79,50 @@ class ThreeGeometry implements Geometry {
     unculledVertices: number[],
     unculledFaces: number[],
   }): this {
-    const { vertices, faces, unculledVertices, unculledFaces } = datas
+    const { vertices, faces, unculledVertices } = datas
 
-    const geometry = this._processingGeometry;
-    const faceVertexUVs = geometry.faceVertexUvs;
-    const hasUV = faceVertexUVs[0] && faceVertexUVs[0].length > 0;
-    const hasUV2 = faceVertexUVs[1] && faceVertexUVs[1].length > 0;
-
-    geometry.vertices = vertices.map(vertex => new THREE.Vector3(vertex.x, vertex.y, vertex.z));
-    geometry.faces = faces.map(face => new THREE.Face3(face.a, face.b, face.c));
+    const geometry = this.originalGeometry;
+    const hasUV = geometry.hasAttribute("uv");
 
     if (hasUV) {
-      geometry.faceVertexUvs[0] = unculledFaces.map(faceIdx => {
-        return geometry.faceVertexUvs[0][faceIdx];
+      const uvArray = new Float32Array(2 * vertices.length);
+      const origUV = geometry.attributes.uv;
+
+      unculledVertices.forEach((vertexIdx, idx) => {
+        const offset = idx * 2;
+        uvArray[offset + 0] = origUV.getX(vertexIdx);
+        uvArray[offset + 1] = origUV.getY(vertexIdx);
       });
-    }
-    if (hasUV2) {
-      geometry.faceVertexUvs[1] = unculledFaces.map(faceIdx => {
-        return geometry.faceVertexUvs[1][faceIdx];
-      });
+
+      geometry.setAttribute("uv", new THREE.BufferAttribute(uvArray, 2));
     }
 
-    geometry.computeFaceNormals();
+    const IndexTypedArray = getUintArrayByVertexLength(vertices.length);
 
-    if (this._isBufferGeometry) {
-      const origGeo = this.originalGeometry as THREE.BufferGeometry;
+    const vertexArray = new Float32Array(3 * vertices.length);
+    const faceArray = new IndexTypedArray(3 * faces.length);
 
-      const bufferGeo = new THREE.BufferGeometry().fromGeometry(geometry);
-      const hasColor = origGeo.attributes.color && origGeo.attributes.color.count > 0;
-      const hasTangent = origGeo.attributes.tangent && origGeo.attributes.tangent.count > 0;
+    vertices.forEach((vertex, idx) => {
+      const offset = idx * 3;
+      vertexArray[offset + 0] = vertex.x;
+      vertexArray[offset + 1] = vertex.y;
+      vertexArray[offset + 2] = vertex.z;
+    });
 
-      if (!hasColor) bufferGeo.deleteAttribute("color");
-      if (hasTangent && hasUV) {
-        const tangents = new Float32Array(faces.length * 12);
+    faces.forEach((face, idx) => {
+      const offset = idx * 3;
+      faceArray[offset + 0] = face.a;
+      faceArray[offset + 1] = face.b;
+      faceArray[offset + 2] = face.c;
+    });
 
-        faces.forEach((face, faceIdx) => {
-          const faceVertices = [face.a, face.b, face.c].map(idx => geometry.vertices[idx]);
-          const faceUVs = faceVertexUVs[0][faceIdx];
+    const vertexBuffer = new THREE.BufferAttribute(vertexArray, 3);
+    const faceBuffer = new THREE.BufferAttribute(faceArray, 1);
 
-          const dPos0 = new THREE.Vector3().subVectors(faceVertices[1], faceVertices[0]);
-          const dPos1 = new THREE.Vector3().subVectors(faceVertices[2], faceVertices[0]);
+    geometry.setAttribute("position", vertexBuffer);
+    geometry.setIndex(faceBuffer);
 
-          const dUV0 = new THREE.Vector2().subVectors(faceUVs[1], faceUVs[0]);
-          const dUV1 = new THREE.Vector2().subVectors(faceUVs[2], faceUVs[0]);
-
-          const r = 1 / (dUV0.x * dUV1.y - dUV0.y * dUV1.x);
-          const tangent = dPos0.multiplyScalar(dUV1.y).sub(dPos1.multiplyScalar(dUV0.y)).multiplyScalar(r).normalize();
-
-          const faceOffset = faceIdx * 12;
-
-          [0, 1, 2].forEach(vIdx => {
-            const vertexOffset = faceOffset + vIdx * 4;
-            tangents[vertexOffset + 0] = tangent.x;
-            tangents[vertexOffset + 1] = tangent.y;
-            tangents[vertexOffset + 2] = tangent.z;
-            tangents[vertexOffset + 3] = 1;
-          });
-        });
-
-        bufferGeo.setAttribute("tangent", new THREE.BufferAttribute(tangents, 4));
-      }
-
-      origGeo.copy(bufferGeo);
-    } else {
-      geometry.verticesNeedUpdate = true;
-      geometry.elementsNeedUpdate = true;
-      geometry.uvsNeedUpdate = true;
-    }
+    geometry.computeVertexNormals();
 
     return this;
   }

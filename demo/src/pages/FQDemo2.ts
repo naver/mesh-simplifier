@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import helvetiker from "three/examples/fonts/helvetiker_regular.typeface.json";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Renderable from "../types/Renderable";
@@ -9,7 +8,7 @@ import OnLoadContext from "../types/OnLoadContext";
 // FastQuadric Test page
 class FQDemo2 implements Renderable {
   public name = "Fast Quadric - textured";
-  public description = "3D Model: <a href=\"https://sketchfab.com/3d-models/closet-of-young-warrior-0698dad7bd1547e38ecd8e0d8080e329\">Closet of Young Warrior</a> by <a href=\"https://sketchfab.com/PatriciaDobbins\">PatriciaDobbins</a>(CC BY 4.0)"
+  public description = "3D Model: <a href=\"https://polyhaven.com/a/marble_bust_01\">Marble Bust 01</a> by <a href=\"https://polyhaven.com\">Poly Haven</a>(CC0)"
   public scene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
 
@@ -27,7 +26,7 @@ class FQDemo2 implements Renderable {
     this.scene.background = new THREE.Color("#C3DFCB");
 
     this.camera = new THREE.PerspectiveCamera();
-    this.camera.position.set(0, 0, 15);
+    this.camera.position.set(0, 0, 1);
     this.camera.lookAt(0, 0, 0);
 
     this._controls = new OrbitControls(this.camera, context.canvas);
@@ -55,7 +54,7 @@ class FQDemo2 implements Renderable {
     directional2.position.set(4, 5, -3);
     this.scene.add(directional2);
 
-    new GLTFLoader().load("./assets/closet_of_young_warrior/scene.gltf", gltf => {
+    new GLTFLoader().load("./assets/marble_bust/marble_bust_01_1k.gltf", gltf => {
       this._origScene = gltf.scene;
 
       const origMeshes: THREE.Mesh[] = [];
@@ -94,8 +93,8 @@ class FQDemo2 implements Renderable {
 
       const simplifier = new FastQuadric({ targetPercentage: 0.5 });
 
-      this._origScene.position.sub(new THREE.Vector3(3, 0, 0));
-      this._simpScene.position.add(new THREE.Vector3(3, 0, 0));
+      this._origScene.position.sub(new THREE.Vector3(0.2, 0, 0));
+      this._simpScene.position.add(new THREE.Vector3(0.2, 0, 0));
 
       simplifier.simplify(adaptedScene);
 
@@ -120,17 +119,6 @@ class FQDemo2 implements Renderable {
 
       this.scene.add(cloned1);
       this.scene.add(cloned2);
-
-      const font = new THREE.FontLoader().parse(helvetiker);
-      const textMat = new THREE.MeshPhongMaterial({ flatShading: true });
-      const text1 = new THREE.Mesh(new THREE.TextGeometry("original", { font, size: 1, height: 0.1 }), textMat);
-      const text2 = new THREE.Mesh(new THREE.TextGeometry("simplified", { font, size: 1, height: 0.1 }), textMat);
-
-      text1.position.set(-5.3, -5, 0);
-      text2.position.set(0.2, -5, 0);
-
-      this.scene.add(text1);
-      this.scene.add(text2);
     });
   }
 }
