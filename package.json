@@ -1,6 +1,6 @@
 {
 	"name": "mesh-simplifier",
-	"version": "2.0.0-beta.0",
+	"version": "1.0.1",
 	"description": "Collection of mesh simplification methods written in Typescript",
 	"main": "dist/mesh-simplifier.js",
 	"module": "dist/mesh-simplifier.esm.js",
